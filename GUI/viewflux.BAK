@@ -1,0 +1,667 @@
+;---------------------------------
+; This function sets the lower range in x axis
+;---------------------------------
+function set_continuum_normaliz_flux, stash, onoff
+    widget_control, stash, GET_UVALUE=state
+
+	 state.div_cont = onoff
+    widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the lower range in x axis
+;---------------------------------
+function set_continuum_flux, stash
+@vars.common
+    widget_control, stash, GET_UVALUE=state
+
+	 l1 = reform(transpose(spectrum.lambda),spectrum.Nlambda)
+	 f1 = reform(transpose(spectrum.flux),spectrum.Nlambda)
+	 state.continuo = linea_base(l1,f1)
+	 stop
+
+    widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the lower range in x axis
+;---------------------------------
+function set_lower_range_flux, stash, onoff
+    widget_control, stash, GET_UVALUE=state
+
+    state.xmin = onoff
+    widget_control, stash, SET_UVALUE=state
+    return, state
+end
+
+;---------------------------------
+; This function sets the lower range in x axis
+;---------------------------------
+function set_upper_range_flux, stash, onoff
+    widget_control, stash, GET_UVALUE=state
+
+    state.xmax = onoff
+    widget_control, stash, SET_UVALUE=state
+    return, state
+end
+;---------------------------------
+; This function sets the y-axis type
+;---------------------------------
+function set_spectrum_yaxis, stash, onoff
+    widget_control, stash, GET_UVALUE=state
+
+    state.inten_temp = onoff
+    widget_control, stash, SET_UVALUE=state
+    return, state
+end
+
+;---------------------------------
+; This function sets the Y axis with logarithm scale
+;---------------------------------
+function set_logy, stash, onoff
+	 widget_control, stash, GET_UVALUE=state
+
+ 	 state.logy = onoff
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the minimum range of the wavelength axis
+;---------------------------------
+function set_rangemin, stash, onoff
+@vars.common
+	 widget_control, stash, GET_UVALUE=state
+
+	 trans = fix(onoff / transition.Nfrq)
+	 frequ = fix(onoff mod transition.Nfrq)
+ 	 state.xmin = spectrum.lambda(trans,frequ)
+	 state.firstall = 0
+	 widget_control, state.labelMin, SET_VALUE=string(2.99792458d10 / state.xmin * 1.d8)
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the maximum range of the wavelength axis
+;---------------------------------
+function set_rangemax, stash, onoff
+@vars.common
+	 widget_control, stash, GET_UVALUE=state
+
+	 trans = fix(onoff / transition.Nfrq)
+	 frequ = fix(onoff mod transition.Nfrq)
+ 	 state.xmax = spectrum.lambda(trans,frequ)
+	 state.firstall = 0
+	 widget_control, state.labelMax, SET_VALUE=string(2.99792458d10 / state.xmax * 1.d8)
+
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the flag to draw the entire spectrum
+;---------------------------------
+function set_all_flux, stash, onoff
+	 widget_control, stash, GET_UVALUE=state
+
+ 	 state.all = onoff
+	 state.firstall = 1
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the flag to use a wavelength axis or a frequency axis
+;---------------------------------
+function set_freqwave, stash, onoff
+	 widget_control, stash, GET_UVALUE=state
+
+ 	 state.freqwave = onoff
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the current line being plotted
+;---------------------------------
+function set_line, stash, onoff
+	 widget_control, stash, GET_UVALUE=state
+
+ 	 state.current = onoff
+	 state.all = 0
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the mu angle being plotted
+;---------------------------------
+function set_mu, stash, onoff
+	 widget_control, stash, GET_UVALUE=state
+
+ 	 state.mu = onoff
+	 widget_control, stash, SET_UVALUE=state
+
+	 return, state
+end
+
+;---------------------------------
+; This function sets the spectrum plotted (LTE or NLTE)
+;---------------------------------
+function set_nltelte, stash, onoff
+	 widget_control, stash, GET_UVALUE=state
+
+ 	 state.nlte_lte = onoff
+
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function plots the entire spectrum using the range in state.xmin and state.xmax
+;---------------------------------
+pro plot_all_flux, state
+@vars.common
+
+	 titlex = 'Frequency (Hz)'
+
+	 xaxis = transpose(spectrum.lambda)
+	 if (state.freqwave eq 0) then begin
+	 	  xaxis = 2.99792458d10 / xaxis * 1.d4
+		  state.xmin = 2.99792458d10 / state.xmin * 1.d4
+		  state.xmax = 2.99792458d10 / state.xmax * 1.d4
+		  titlex = 'Wavelength (!7l!3m)'
+	 endif
+
+	 if (state.freqwave eq 2) then begin
+	 	  nu = 2.99792458d10 / xaxis * 1.d8
+	 	  center = nu(n_elements(nu)/2)
+	 	  xaxis = 2.99792458d5 * (-1.d0 + nu / center)
+		  titlex = 'Velocity (km/s)'
+	 endif
+
+	 if (state.freqwave eq 3) then begin
+	 	  xaxis = xaxis / 2.99792458d10
+		  titlex = 'Wavenumber (cm!E-1!N)'
+	 endif
+
+	 if (state.nlte_lte eq 0) then begin
+	 	  yaxis = transpose(spectrum.flux(*,*))
+		  if (state.div_cont eq 1) then yaxis = yaxis / state.continuo
+	 endif else begin
+	 	  yaxis = transpose(spectrum.fluxLTE(*,*))
+	 endelse
+
+
+	 if (state.inten_temp eq 1) then begin
+	 	  temp = 1.d0 + 1.47244d-47 * transition.freq(state.current)^3 / yaxis
+	 	  temp = 4.79797d-11 * transition.freq(state.current) / alog(temp)
+	 	  yaxis = temp
+	 endif
+
+	 if (state.inten_temp eq 2) then begin
+	 	  yaxis = yaxis / 1.d-23 * 1.d3
+	 endif
+
+	 if (state.inten_temp eq 3) then begin
+	 	  yaxis = yaxis * 1.d-7
+	 endif
+
+	 if (state.inten_temp eq 4) then begin
+	 	  yaxis = yaxis / yaxis(0)
+	 endif
+
+	 if (state.logy eq 1) then titley = 'F'
+	 if (state.logy eq 0) then titley = 'F'
+
+;	 if (state.xmin lt state.xmax and state.firstall ne 1) then begin
+	 if (state.xmin lt state.xmax) then begin
+		  plot, xaxis, yaxis, YLOG=state.logy, xrange=[state.xmin, $
+		   	state.xmax], xstyle=1, /ynozero
+	 endif else begin
+	 	  plot, xaxis, yaxis, YLOG=state.logy, /ynozero
+	 endelse
+
+end
+
+;---------------------------------
+; This function plots a line
+;---------------------------------
+pro plot_flux, state
+@vars.common
+	 k = state.current
+
+	 xaxis = dblarr(transition.Nfrq)
+	 yaxis = dblarr(transition.Nfrq)
+
+	 xaxis = spectrum.lambda(k,*)
+
+	 titlex = 'Frequency (Hz)'
+	 if (state.freqwave eq 0) then begin
+	 	  xaxis = 2.99792458d10 / xaxis * 1.d4
+		  titlex = 'Wavelength (!7l!3m)'
+	 endif
+
+	 if (state.freqwave eq 2) then begin
+	 	  nu = 2.99792458d10 / xaxis * 1.d8
+	 	  center = nu(n_elements(nu)/2)
+	 	  xaxis = 2.99792458d5 * (-1.d0 + nu / center)
+		  titlex = 'Velocity (km/s)'
+	 endif
+
+	 if (state.freqwave eq 3) then begin
+	 	  xaxis = xaxis / 2.99792458d10
+		  titlex = 'Wavenumber (cm!E-1!N)'
+	 endif
+
+	 if (state.nlte_lte eq 0) then begin
+	 	  yaxis = spectrum.flux(k,*)
+	 endif else begin
+	 	  yaxis = spectrum.fluxLTE(k,*)
+	 endelse
+
+	 if (state.inten_temp eq 1) then begin
+		  temp = 1.d0 + 1.47244d-47 * transition.freq(state.current)^3 / yaxis
+	 	  temp = 4.79797d-11 * transition.freq(state.current) / alog(temp)
+	 	  yaxis = temp
+	 endif
+
+	 if (state.inten_temp eq 2) then begin
+	 	  yaxis = yaxis / 1.d-23
+	 endif
+
+	 if (state.inten_temp eq 3) then begin
+	 	  yaxis = yaxis * 1.d-7
+	 endif
+
+	 if (state.inten_temp eq 4) then begin
+	 	  yaxis = yaxis / yaxis(0)
+	 endif
+
+	 if (state.logy eq 1 and state.inten_temp eq 0) then titley = 'log F'
+	 if (state.logy eq 0 and state.inten_temp eq 0) then titley = 'F'
+	 if (state.logy eq 1 and state.inten_temp eq 1) then titley = 'log T'
+	 if (state.logy eq 0 and state.inten_temp eq 1) then titley = 'T'
+
+	 plot, xaxis, yaxis, YLOG=state.logy, xtitle=titlex, ytitle=titley, /ynozero
+
+end
+
+
+;---------------------------------
+; This function fills the line list
+;---------------------------------
+pro fill_lines, state
+@vars.common
+
+	 lines = strarr(transition.Ntran)
+	 lines = string(transition.up)+'    '+string(transition.low)
+	 widget_control, state.lineList, SET_VALUE=lines
+end
+
+pro Viewflux_event, Event
+
+	 stash = widget_info( Event.handler, /CHILD)
+	 widget_control, stash, GET_UVALUE=state
+
+	 widget_control, Event.id, GET_UVALUE=Action
+
+	 case Action of
+	 	  'QUIT': begin
+		   	!x.range = 0
+				!y.range = 0
+				widget_control, Event.top, /DESTROY
+		  end
+
+		  'POSTCRIPT': begin
+		   	name = dialog_pickfile()
+				if (name ne '') then begin
+					 abre_ps, name, /landscape
+	 				 plot_flux, state
+		   		 cierra_ps
+				endif
+		  end
+
+		  'LEVELLIST': begin
+		   	plot_flux, set_line(stash, Event.index)
+		  end
+
+		  'LOGY_OFF': begin
+				if (state.all eq 1) then $
+					 plot_all_flux, set_logy(stash,0) $
+				else plot_flux, set_logy(stash,0)
+		  end
+
+		  'LOGY_ON': begin
+		  		if (state.all eq 1) then $
+					 plot_all_flux, set_logy(stash,1) $
+				else plot_flux, set_logy(stash,1)
+		  end
+
+		  'FREQ_ON': begin
+		   	if (state.all eq 1) then $
+					 plot_all_flux, set_freqwave(stash,1) $
+				else plot_flux, set_freqwave(stash,1)
+		  end
+
+		  'FREQ_OFF': begin
+		   	if (state.all eq 1) then $
+					 plot_all_flux, set_freqwave(stash,0) $
+				else plot_flux, set_freqwave(stash,0)
+		  end
+
+		  'FREQ_VEL': begin
+		   	if (state.all eq 1) then $
+					 plot_all_flux, set_freqwave(stash,2) $
+				else plot_flux, set_freqwave(stash,2)
+		  end
+
+		  'FREQ_NUMBER': begin
+		   	if (state.all eq 1) then $
+					 plot_all_flux, set_freqwave(stash,3) $
+				else plot_flux, set_freqwave(stash,3)
+		  end
+
+		  'NLTE_ON': begin
+				plot_flux, set_nltelte(stash,0)
+		  end
+
+		  'NLTE_OFF': begin
+				plot_flux, set_nltelte(stash,1)
+		  end
+
+		  'MIN_SLIDER': begin
+		   	plot_all_flux, set_rangemin(stash,event.value)
+		  end
+
+		  'MAX_SLIDER': begin
+		   	plot_all_flux, set_rangemax(stash,event.value)
+		  end
+
+		  'CLEAN': begin
+				state = set_overplot(stash,0, /CLEAN)
+				state.current = 0
+				plot_flux, state
+		  end
+
+		  'WHOLE': begin
+				plot_all_flux, set_all_flux(stash,1)
+		  end
+
+		  'BASELINE': begin
+	 	   	plot_all_flux, set_continuum_flux(stash)
+		  end
+
+		  'CONTI': begin
+		   	if (state.div_cont eq 0) then begin
+	 	   		 plot_all_flux, set_continuum_normaliz_flux(stash,1)
+				endif else begin
+					 plot_all_flux, set_continuum_normaliz_flux(stash,0)
+				endelse
+		  end
+
+		  'HZ': begin
+              fill_lines_spectrum, set_spectrum_units(stash, 0)
+        end
+
+        'CM': begin
+              fill_lines_spectrum, set_spectrum_units(stash, 1)
+        end
+
+        'KELVIN': begin
+              fill_lines_spectrum, set_spectrum_units(stash, 2)
+        end
+
+		  'MICRONS': begin
+              fill_lines_spectrum, set_spectrum_units(stash, 3)
+        end
+
+	 	  'ANGSTROMS': begin
+              fill_lines_spectrum, set_spectrum_units(stash, 4)
+        end
+
+		  'INTENSITY': begin
+				  plot_flux, set_spectrum_yaxis(stash, 0)
+        end
+
+		  'TEMPERATURE': begin
+              plot_flux, set_spectrum_yaxis(stash, 1)
+        end
+
+		  'JANSKY': begin
+              plot_flux, set_spectrum_yaxis(stash, 2)
+        end
+
+		  'WCM2': begin
+              plot_flux, set_spectrum_yaxis(stash, 3)
+        end
+        'NORMALIZE': begin
+              plot_flux, set_spectrum_yaxis(stash, 4)
+        end
+
+		  'LOWER': begin
+		   	widget_control, state.lower, get_value=temp
+		   	plot_all_flux, set_lower_range_flux(stash,temp)
+		  end
+
+		  'UPPER': begin
+		   	widget_control, state.upper, get_value=temp
+		   	plot_all_flux, set_upper_range_flux(stash,temp)
+		  end
+
+		  'YUP': begin
+		   	widget_control, state.yu, get_value=temp
+		   	!y.range[1] = temp
+		  end
+
+		  'YDOWN': begin
+		   	widget_control, state.yd, get_value=temp
+		   	!y.range[0] = temp
+		  end
+
+		  'XUP': begin
+		   	widget_control, state.xu, get_value=temp
+		   	!x.range[1] = temp
+		  end
+
+		  'XDOWN': begin
+		   	widget_control, state.xd, get_value=temp
+		   	!x.range[0] = temp
+		  end
+
+		  'RESET': begin
+		   	!x.range = 0
+				!y.range = 0
+		  end
+
+	 endcase
+end
+
+function viewflux_init
+@vars.common
+	 state = {baseWidget: 0L, drawWidget: 0L, labelMu: 0L, lineList: 0L, logy: 0, nlte_lte: 0, $
+	 	  mu: 0, current: 0, freqwave: 0, labelmin: 0L, labelmax: 0L, all: 0, $
+		  xmin: 0., xmax: n_elements(spectrum.lambda)-1., firstall: 1, inten_temp: 0,$
+		  unit: 0, lower: 0, upper : 0, continuo: dblarr(spectrum.nlambda), div_cont: 0,$
+		  yu:0L ,yd:0L, xu:0L, xd:0L}
+
+;---------------------------------
+; Main window
+;---------------------------------
+	 state.baseWidget = widget_base(TITLE='Flux', /ROW, $
+	 	  MBAR=menuBar, RESOURCE_NAME='Viewflux')
+	 populBase = widget_base(state.baseWidget, /COLUMN)
+
+;---------------------------------
+; File menu
+;---------------------------------
+	 fileMenu  = widget_button(menuBar, VALUE='File', /MENU)
+
+;---------------------------------
+; Quit button
+;---------------------------------
+	 quitButton = widget_button(fileMenu, VALUE='Quit', UVALUE='QUIT', $
+                             RESOURCE_NAME='quitbutton')
+
+;---------------------------------
+; Postcript button
+;---------------------------------
+	 postcriptButton = widget_button(fileMenu, VALUE='Postcript', UVALUE='POSTCRIPT', $
+                             RESOURCE_NAME='postcript')
+
+;---------------------------------
+; Drawing window
+;---------------------------------
+	 drawFrame = widget_base(populBase, /FRAME)
+    state.drawWidget = widget_draw(drawFrame, XSIZE=600, YSIZE=450, $
+                                 /BUTTON_EVENTS, UVALUE='SET_SCALE')
+
+	 botones1 = widget_base(populBase, /FRAME, /ROW)
+
+;---------------------------------
+; Linear/logaritmic axis for X
+;---------------------------------
+	 linlogyFrame = widget_base(botones1, /COLUMN, /EXCLUSIVE)
+	 linyButton = widget_button(linlogyFrame, VALUE='Linear Y', $
+                               UVALUE='LOGY_OFF')
+	 logyButton = widget_button(linlogyFrame, VALUE='Log Y', $
+                               UVALUE='LOGY_ON')
+	 widget_control, (state.logy) ? logyButton : linyButton, /SET_BUTTON
+
+;---------------------------------
+; NLTE/LTE
+;---------------------------------
+	 nlte_lteFrame = widget_base(botones1, /COLUMN, /EXCLUSIVE)
+	 nlteButton = widget_button(nlte_lteFrame, VALUE='NLTE', $
+                               UVALUE='NLTE_ON')
+	 lteButton = widget_button(nlte_lteFrame, VALUE='LTE', $
+                               UVALUE='NLTE_OFF')
+	 widget_control, (state.nlte_lte) ? lteButton : nlteButton, /SET_BUTTON
+
+;---------------------------------
+; Frequency/wavelength
+;---------------------------------
+	 freqwaveFrame = widget_base(botones1, /COLUMN, /EXCLUSIVE)
+	 freqButton = widget_button(freqwaveFrame, VALUE='Frequency axis', $
+                               UVALUE='FREQ_ON')
+	 waveButton = widget_button(freqwaveFrame, VALUE='Wavelength axis', $
+                               UVALUE='FREQ_OFF')
+	 velocButton = widget_button(freqwaveFrame, VALUE='Velocity axis', $
+                               UVALUE='FREQ_VEL')
+	 wavnumButton = widget_button(freqwaveFrame, VALUE='Wavenumber axis', $
+                               UVALUE='FREQ_NUMBER')
+	 widget_control, (state.freqwave) ? freqButton : waveButton, /SET_BUTTON
+
+;---------------------------------
+; Intensity/Temperature/mJ
+;---------------------------------
+	 intenFrame = widget_base(botones1, /COLUMN, /EXCLUSIVE)
+	 intenButton = widget_button(intenFrame, VALUE='Flux (cgs)', $
+                               UVALUE='INTENSITY')
+	 temperButton = widget_button(intenFrame, VALUE='Temperature', $
+                               UVALUE='TEMPERATURE')
+	 janskyButton = widget_button(intenFrame, VALUE='Flux (Jy)', $
+                               UVALUE='JANSKY')
+	 wcm2Button = widget_button(intenFrame, VALUE='Flux (W*cm^-2)', $
+                               UVALUE='WCM2')
+	 normalizButton = widget_button(intenFrame, VALUE='Normalize', $
+                               UVALUE='NORMALIZE')
+
+	 widget_control, (state.inten_temp) ? temperButton : intenButton, /SET_BUTTON
+
+;---------------------------------
+; Cleaning
+;---------------------------------
+	 cleanFrame = widget_base(botones1, /COLUMN)
+	 cleanButton = widget_button(cleanFrame, VALUE='Clean', $
+                               UVALUE='CLEAN')
+	 wholeButton = widget_button(cleanFrame, VALUE='All', $
+                               UVALUE='WHOLE')
+	 baselineButton = widget_button(cleanFrame, VALUE='Baseline', $
+                               UVALUE='BASELINE')
+	 contButton = widget_button(cleanFrame, VALUE='Continuum normalization', $
+                               UVALUE='CONTI')
+
+
+
+;---------------------------------
+; Level list
+;---------------------------------
+	 transFrame = widget_base( populBase, /ROW, /FRAME )
+	 lineFormat = 'Transition (!3Å)'
+	 lineFrame  = widget_base(transFrame, /COLUMN)
+	 lineLabel  = widget_label(lineFrame, VALUE='Line list        ')
+	 state.lineList = widget_list(lineFrame, UVALUE='LEVELLIST', $
+                                   RESOURCE_NAME='list', $
+                                   YSIZE=10, XSIZE=18, VALUE=lineFormat)
+	 unitsFrame = widget_base(transFrame, /COLUMN, /EXCLUSIVE)
+    hzButton = widget_button(unitsFrame, VALUE='Hz', UVALUE='HZ')
+    cmButton = widget_button(unitsFrame, VALUE='cm^-1', UVALUE='CM')
+    kelvinButton = widget_button(unitsFrame, VALUE='Kelvin', UVALUE='KELVIN')
+	 micronsButton = widget_button(unitsFrame, VALUE='Micron', UVALUE='MICRONS')
+	 angsButton = widget_button(unitsFrame, VALUE='Angstrom', UVALUE='ANGSTROMS')
+    widget_control, hzButton, /SET_BUTTON
+	 fill_lines_spectrum, state
+
+;---------------------------------
+; Wavelength slider
+;---------------------------------
+;	 axisFrame = widget_base(transFrame, /COLUMN)
+;	 lowerButton = widget_label(axisFrame, VALUE='Lower', $
+;                               UVALUE='LOWER')
+;    state.lower = widget_text(axisFrame, VALUE='0', $
+;                               UVALUE='LOWER', /EDITABLE)
+;	 upperButton = widget_label(axisFrame, VALUE='Upper', $
+;                               UVALUE='UPPER')
+;    state.upper = widget_text(axisFrame, VALUE='0', $
+;                               UVALUE='UPPER', /EDITABLE)
+
+	 fill_lines, state
+
+
+;---------------------------------
+; Y axis
+;---------------------------------
+	 yFrame = widget_base(transFrame, /COLUMN)
+	 ylower = widget_label(yFrame, VALUE='Y low', UVALUE='YLOW')
+	 state.yd = widget_text(yFrame, VALUE='0', $
+                               UVALUE='YDOWN', /EDITABLE)
+	 yupper = widget_label(yFrame, VALUE='Y up', UVALUE='YUP')
+	 state.yu = widget_text(yFrame, VALUE='1', $
+                               UVALUE='YUP', /EDITABLE)
+
+
+;---------------------------------
+; X axis
+;---------------------------------
+	 xFrame = widget_base(transFrame, /COLUMN)
+	 xlower = widget_label(xFrame, VALUE='X low', UVALUE='XLOW')
+	 state.xd = widget_text(xFrame, VALUE='0', $
+                               UVALUE='XDOWN', /EDITABLE)
+	 xupper = widget_label(xFrame, VALUE='X up', UVALUE='XUP')
+	 state.xu = widget_text(xFrame, VALUE='1', $
+                               UVALUE='XUP', /EDITABLE)
+
+	 resetFrame = widget_base(transFrame, /COLUMN)
+	 resetButton = widget_button(resetFrame, value='Reset', UVALUE='RESET')
+
+
+	 widget_control, widget_info(state.baseWidget, /CHILD), SET_UVALUE=state
+
+	 return, state
+end
+
+
+pro viewflux, LEADER=leader
+	 if (NOT keyword_set(LEADER)) then leader=0
+
+	 state = viewflux_init()
+
+	 widget_control, state.baseWidget, /REALIZE, GROUP_LEADER=leader
+
+	 xmanager, 'Viewflux', state.baseWidget, $
+    	  EVENT_HANDLER='Viewflux_event', GROUP_LEADER=leader
+end

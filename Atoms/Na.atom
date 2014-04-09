@@ -1,0 +1,77 @@
+# One single ion (Ca II) with 5 bound levels, 5 active transitions,
+# 5 radiative (R) transitions, and 10 collisional (C) transitions.
+# NOTE: active transitions ... The RT equation has to be solved
+#       pasive transitions ... Radiation Temperatures a used
+# NOTE: active + passive transitions = number of R transitions = NR. 
+
+# Atom or molecule (ATOM / MOLECULE)
+ATOM
+
+# Name
+Na
+
+# Mass of element 
+22.989770
+
+# Number of ions
+1
+
+# Ionization levels
+0.d0
+
+# Number of levels
+11
+
+# Number of transitions
+27
+
+# Number of radiative transitions
+27 0
+
+# Number of active transitions
+27
+
+# Levels (E, g and ion)         '------------------'
+   0.0000000   2    1   'Nivel 1                          '
+5.0868516e+14  2    1   'Nivel 2                          '
+5.0920102e+14  4    1    'Nivel 3                         '
+7.7219977e+14  2    1   'Nivel 4                          '
+8.7518572e+14  10   1   'Nivel 5                          '
+9.0812150e+14  6    1   'Nivel 6                          '
+1.0364624e+15  10   1   'Nivel 7                          '
+1.0376077e+15  14   1   'Nivel 8                          '
+1.1117614e+15  32   1   'Nivel 9                          '
+1.1520213e+15  54   1   'Nivel 10                 '
+1.1743800e+15  98   1   'Nivel 11                 '
+
+# Transitions (upper, lower, Aij)
+ 2        1   60960923.
+ 3        1     60623465.
+ 5        1   681152.78
+ 6        1   2892796.5
+11        1     12723.715
+ 4        2     8388027.4
+ 5        2     16524190.
+ 7        2     4376228.8
+11        2     64408.116
+ 4        3     16710436.
+ 5        3     33074527.
+ 7        3     8702392.5
+11        3     129419.67
+ 6        4     6161030.3
+ 8        5     13964480.
+ 9        5     2060868.8
+10        5     578463.44
+ 7        6     6664774.8
+11        6     99070.821
+ 9        7     1128462.2
+10        7     339221.17
+11        7     104427.06
+ 9        8     2394321.2
+10        8     459757.54
+11        8     117241.89
+10        9     840650.43
+11        9     222028.88
+
+# Collisional rates for all transitions
+END

@@ -1,0 +1,7 @@
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}
+\contentsline {section}{\numberline {2}Uncompressing and compiling Gocciola}{3}{section.2}
+\contentsline {section}{\numberline {3}Main configuration file}{3}{section.3}
+\contentsline {section}{\numberline {4}Atomic file}{9}{section.4}
+\contentsline {section}{\numberline {5}Atmospheric model}{12}{section.5}
+\contentsline {section}{\numberline {6}Output}{13}{section.6}
+\contentsline {section}{\numberline {7}Graphical User Interface}{13}{section.7}

@@ -1,0 +1,583 @@
+;---------------------------------
+; This function sets the y-axis type
+;---------------------------------
+function set_spectrum_bbody, stash, onoff
+    widget_control, stash, GET_UVALUE=state
+
+    state.blackbody = onoff
+    widget_control, stash, SET_UVALUE=state
+    return, state
+end
+
+;---------------------------------
+; This function sets the y-axis type
+;---------------------------------
+function set_spectrum_yaxis, stash, onoff
+    widget_control, stash, GET_UVALUE=state
+
+    state.inten_temp = onoff
+    widget_control, stash, SET_UVALUE=state
+    return, state
+end
+
+;---------------------------------
+; This function sets the units for the transition
+;---------------------------------
+function set_spectrum_units, stash, onoff
+    widget_control, stash, GET_UVALUE=state
+
+    state.unit = onoff
+    widget_control, stash, SET_UVALUE=state
+    return, state
+end
+
+;---------------------------------
+; This function sets the Y axis with logarithm scale
+;---------------------------------
+function set_logy_spectrum, stash, onoff
+	 widget_control, stash, GET_UVALUE=state
+
+ 	 state.logy = onoff
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the minimum range of the wavelength axis
+;---------------------------------
+function set_rangemin_spectrum, stash, onoff
+@vars.common
+	 widget_control, stash, GET_UVALUE=state
+
+	 trans = fix(onoff / transition.Nfrq)
+	 frequ = fix(onoff mod transition.Nfrq)
+ 	 state.xmin = spectrum.lambda(trans,frequ)
+	 state.firstall = 0
+	 widget_control, state.labelMin, SET_VALUE=string(2.99792458d10 / state.xmin * 1.d8)
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the maximum range of the wavelength axis
+;---------------------------------
+function set_rangemax_spectrum, stash, onoff
+@vars.common
+	 widget_control, stash, GET_UVALUE=state
+
+	 trans = fix(onoff / transition.Nfrq)
+	 frequ = fix(onoff mod transition.Nfrq)
+ 	 state.xmax = spectrum.lambda(trans,frequ)
+	 state.firstall = 0
+	 widget_control, state.labelMax, SET_VALUE=string(2.99792458d10 / state.xmax * 1.d8)
+
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the flag to draw the entire spectrum
+;---------------------------------
+function set_all_spectrum, stash, onoff
+	 widget_control, stash, GET_UVALUE=state
+ 	 state.all = onoff
+	 state.firstall = 1
+
+	 if (state.all_read eq 1) then state.all_read = 2
+	 if (state.all_read eq 0) then state.all_read = 1
+
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the flag to use a wavelength axis or a frequency axis
+;---------------------------------
+function set_freqwave_spectrum, stash, onoff
+	 widget_control, stash, GET_UVALUE=state
+
+ 	 state.freqwave = onoff
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the current line being plotted
+;---------------------------------
+function set_line_spectrum, stash, onoff
+	 widget_control, stash, GET_UVALUE=state
+
+ 	 state.current = onoff
+	 state.all = 0
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function sets the mu angle being plotted
+;---------------------------------
+function set_mu_spectrum, stash, onoff
+	 widget_control, stash, GET_UVALUE=state
+
+ 	 state.mu = onoff
+	 widget_control, stash, SET_UVALUE=state
+
+	 return, state
+end
+
+;---------------------------------
+; This function sets the spectrum plotted (LTE or NLTE)
+;---------------------------------
+function set_nltelte_spectrum, stash, onoff
+	 widget_control, stash, GET_UVALUE=state
+
+ 	 state.nlte_lte = onoff
+
+	 widget_control, stash, SET_UVALUE=state
+	 return, state
+end
+
+;---------------------------------
+; This function plots the entire spectrum using the range in state.xmin and state.xmax
+;---------------------------------
+pro plot_all_spectrum, state
+@vars.common
+@files.common
+
+	 titlex = 'Frequency (Hz)'
+	 if (state.all_read eq 1) then begin
+	 	  read_spectrum, spectrfile
+	 endif
+
+
+	 xaxis = transpose(spectrum.lambda)
+	 widget_control, state.bbtemp, get_value=temp
+	 black = plancknu(temp(0), xaxis)
+
+	 if (state.freqwave eq 0) then begin
+	 	  xaxis = 2.99792458d10 / xaxis * 1.d8
+		  state.xmin = 2.99792458d10 / state.xmin * 1.d8
+		  state.xmax = 2.99792458d10 / state.xmax * 1.d8
+		  titlex = 'Wavelength (!3Å)'
+	 endif
+
+	 if (state.freqwave eq 2) then begin
+	 	  nu = 2.99792458d10 / xaxis * 1.d8
+	 	  center = nu(n_elements(nu)/2)
+	 	  xaxis = 2.99792458d5 * (-1.d0 + nu / center)
+		  titlex = 'Velocity (km/s)'
+	 endif
+
+	 yaxis = transpose(spectrum.I(state.mu,*,*))
+
+	 if (state.logy eq 1) then titley = 'log I'
+	 if (state.logy eq 0) then titley = 'I'
+
+	 if (state.inten_temp eq 1) then begin
+;	 	  temp = 1.d0 + 1.47244d-47 * transition.freq(state.current)^3 / yaxis
+;	 	  temp = 4.79797d-11 * transition.freq(state.current) / alog(temp)
+;	 	  yaxis = temp
+;		  if (state.logy eq 1) then titley = 'log T'
+;	 	  if (state.logy eq 0) then titley = 'T'
+	 endif
+
+	 if (state.xmin lt state.xmax and state.firstall ne 1) then begin
+		  plot, xaxis, yaxis, YLOG=state.logy, xrange=[state.xmin, state.xmax], xstyle=1
+	 endif else begin
+	 	  plot, xaxis, yaxis, YLOG=state.logy
+	 endelse
+
+	 if (state.blackbody eq 1 and state.freqwave eq 1) then begin
+	   	oplot, xaxis, black, linestyle=2
+	 endif
+
+end
+
+;---------------------------------
+; This function plots a line
+;---------------------------------
+pro plot_spectrum, state, top
+@vars.common
+@files.common
+	 k = state.current
+
+	 read_one_spectrum, spectrfile, k, state.mu
+
+	 xaxis = dblarr(transition.Nfrq)
+	 yaxis = dblarr(transition.Nfrq)
+
+	 xaxis = spectrum.lambda(k,*)
+
+	 titlex = '!6Frequency (Hz)'
+	 if (state.freqwave eq 0) then begin
+	 	  xaxis = 2.99792458d10 / xaxis * 1.d8
+		  titlex = '!6Wavelength [!3Å]'
+	 endif
+
+	 if (state.freqwave eq 2) then begin
+	 	  nu = 2.99792458d10 / xaxis * 1.d8
+	 	  center = nu(n_elements(nu)/2)
+	 	  xaxis = 2.99792458d5 * (-1.d0 + nu / center)
+		  titlex = '!6Velocity [km s!E-1!N]'
+	 endif
+
+	 if (state.freqwave eq 3) then begin
+	 	  wave = 2.99792458d10 / xaxis
+	 	  xaxis = 1.d0 / wave
+		  titlex = '!6Frequency [cm!E-1!N]'
+	 endif
+
+	 if (state.nlte_lte eq 0) then begin
+	 	  yaxis = spectrum.I(state.mu,k,*)
+	 endif else begin
+	 	  yaxis = spectrum.ILTE(state.mu,k,*)
+	 endelse
+
+	 if (state.logy eq 1) then titley = '!6I [erg cm!E-2!N s!E-1!N sr!E-1!N cm!E-1!N]'
+	 if (state.logy eq 0) then titley = '!6I [erg cm!E-2!N s!E-1!N sr!E-1!N cm!E-1!N]'
+
+	 if (state.inten_temp eq 1) then begin
+	 	  temp = 1.d0 + 1.47244d-47 * transition.freq(state.current)^3 / yaxis
+	 	  temp = 4.79797d-11 * transition.freq(state.current) / alog(temp)
+	 	  yaxis = temp
+		  if (state.logy eq 1) then titley = '!6Brightness temperature [K]'
+	 	  if (state.logy eq 0) then titley = '!6Brightness temperature [K]'
+	 endif
+
+	 widget_control, state.labelMu, SET_VALUE=string(geometry.mu(state.mu))
+
+	 plot, xaxis, yaxis, YLOG=state.logy, xtitle=titlex, ytitle=titley
+;	 xyouts, -1., 3, 'CO 2-1'
+
+end
+
+
+;---------------------------------
+; This function fills the line list
+;---------------------------------
+pro fill_lines_spectrum, state
+@vars.common
+
+	 lines = strarr(transition.Ntran)
+	 case state.unit of
+   	 0: lines = strtrim(string(transition.up),2)+' ->  '+strtrim(string(transition.low),2)+$
+		  '   :      '+strtrim(string(transition.freq),2)
+   	 1: lines = strtrim(string(transition.up),2)+' ->  '+strtrim(string(transition.low),2)+$
+		  '   :      '+strtrim(string(transition.freq / 2.99792458d10),2) ; E(cm^-1) = 1/c * E(Hz)
+   	 2: lines = strtrim(string(transition.up),2)+' ->  '+strtrim(string(transition.low),2)+$
+	 	  '   :      '+strtrim(string(6.62606876d-27 / 1.3806503d-16 * transition.freq),2) ; E(K)=h/k * E(Hz)
+	 	 3: lines = strtrim(string(transition.up),2)+' ->  '+strtrim(string(transition.low),2)+$
+	 	  '   :      '+strtrim(string(2.99792458d14 / transition.freq),2) ; E(microns)= 1.d6 * c / E(Hz)
+   	 4: lines = strtrim(string(transition.up),2)+' ->  '+strtrim(string(transition.low),2)+$
+	 	  '   :      '+strtrim(string(2.99792458d18 / transition.freq),2) ; E(A) = 1.d10 * c / E(Hz)
+    endcase
+	 widget_control, state.lineList, SET_VALUE=lines
+end
+
+pro Viewspectrum_event, Event
+
+	 stash = widget_info( Event.handler, /CHILD)
+	 widget_control, stash, GET_UVALUE=state
+
+	 widget_control, Event.id, GET_UVALUE=Action
+	 case Action of
+	 	  'QUIT': begin
+		   	widget_control, Event.top, /DESTROY
+		  end
+
+		  'POSTCRIPT': begin
+		   	name = dialog_pickfile()
+				if (name ne '') then begin
+					 abre_ps, name;, /landscape
+					 plot_spectrum, state
+					 cierra_ps
+				endif
+		  end
+
+		  'LEVELLIST': begin
+		   	plot_spectrum, set_line_spectrum(stash, Event.index), event.top
+		  end
+
+		  'LOGY_OFF': begin
+				if (state.all eq 1) then $
+					 plot_all_spectrum, set_logy_spectrum(stash,0) $
+				else plot_spectrum, set_logy_spectrum(stash,0)
+		  end
+
+		  'LOGY_ON': begin
+		  		if (state.all eq 1) then $
+					 plot_all_spectrum, set_logy_spectrum(stash,1) $
+				else plot_spectrum, set_logy_spectrum(stash,1)
+		  end
+
+		  'FREQ_ON': begin
+		   	if (state.all eq 1) then $
+					 plot_all_spectrum, set_freqwave_spectrum(stash,1) $
+				else plot_spectrum, set_freqwave_spectrum(stash,1)
+		  end
+
+		  'FREQ_OFF': begin
+		   	if (state.all eq 1) then $
+					 plot_all_spectrum, set_freqwave_spectrum(stash,0) $
+				else plot_spectrum, set_freqwave_spectrum(stash,0)
+		  end
+
+		  'FREQ_VEL': begin
+		   	if (state.all eq 1) then $
+					 plot_all_spectrum, set_freqwave_spectrum(stash,2) $
+				else plot_spectrum, set_freqwave_spectrum(stash,2)
+		  end
+
+		  'FREQ_CM': begin
+		   	if (state.all eq 1) then $
+					 plot_all_spectrum, set_freqwave_spectrum(stash,3) $
+				else plot_spectrum, set_freqwave_spectrum(stash,3)
+		  end
+
+		  'NLTE_ON': begin
+				plot_spectrum, set_nltelte_spectrum(stash,0)
+		  end
+
+		  'NLTE_OFF': begin
+				plot_spectrum, set_nltelte_spectrum(stash,1)
+		  end
+
+		  'MU_SLIDER': begin
+		   	plot_spectrum, set_mu_spectrum(stash,event.value)
+		  end
+
+		  'MIN_SLIDER': begin
+		   	plot_all, set_rangemin_spectrum(stash,event.value)
+		  end
+
+		  'MAX_SLIDER': begin
+		   	plot_all, set_rangemax_spectrum(stash,event.value)
+		  end
+
+		  'CLEAN': begin
+				state = set_overplot(stash,0, /CLEAN)
+				state.current = 0
+				plot_spectrum, state
+		  end
+
+		  'WHOLE': begin
+				plot_all_spectrum, set_all_spectrum(stash,1)
+		  end
+
+		  'HZ': begin
+              fill_lines_spectrum, set_spectrum_units(stash, 0)
+        end
+
+        'CM': begin
+              fill_lines_spectrum, set_spectrum_units(stash, 1)
+        end
+
+        'KELVIN': begin
+              fill_lines_spectrum, set_spectrum_units(stash, 2)
+        end
+
+		  'MICRONS': begin
+              fill_lines_spectrum, set_spectrum_units(stash, 3)
+        end
+
+	 	  'ANGSTROMS': begin
+              fill_lines_spectrum, set_spectrum_units(stash, 4)
+        end
+
+		  'INTENSITY': begin
+				  plot_spectrum, set_spectrum_yaxis(stash, 0)
+        end
+
+		  'TEMPERATURE': begin
+              plot_spectrum, set_spectrum_yaxis(stash, 1)
+        end
+
+		  'BBTEMP': begin
+		   	  state = set_spectrum_bbody(stash,1)
+              plot_all_spectrum, set_spectrum_yaxis(stash, 1)
+        end
+
+		  'SET_SCALE': begin
+				deltax_pixel = !p.clip[2] - !p.clip[0]
+				deltay_pixel = !p.clip[3] - !p.clip[1]
+				deltax_data = !x.crange[1] - !x.crange[0]
+				deltay_data = !y.crange[1] - !y.crange[0]
+		   	print, (Event.X-!p.clip[0]) * deltax_data / deltax_pixel + !x.crange[0], $
+					 (Event.Y-!p.clip[1]) * deltay_data / deltay_pixel + !y.crange[0]
+		  end
+
+	 endcase
+end
+
+function viewspectrum_init
+@vars.common
+	 state = {baseWidget: 0L, drawWidget: 0L, labelMu: 0L, lineList: 0L, logy: 0, nlte_lte: 0, $
+	 	  mu: 0, current: 0, freqwave: 0, labelmin: 0L, labelmax: 0L, all: 0, $
+		  xmin: max(spectrum.lambda), xmax: min(spectrum.lambda), firstall: 1, all_read: 0,$
+		  unit: 0, inten_temp: 0, blackbody: 0L, bbtemp: 0L, sigma: 0L}
+
+;---------------------------------
+; Main window
+;---------------------------------
+	 state.baseWidget = widget_base(TITLE='Spectrum', /ROW, $
+	 	  MBAR=menuBar, RESOURCE_NAME='Viewspectrum')
+	 populBase = widget_base(state.baseWidget, /COLUMN)
+
+;---------------------------------
+; File menu
+;---------------------------------
+	 fileMenu  = widget_button(menuBar, VALUE='File', /MENU)
+
+;---------------------------------
+; Quit button
+;---------------------------------
+	 quitButton = widget_button(fileMenu, VALUE='Quit', UVALUE='QUIT', $
+                             RESOURCE_NAME='quitbutton')
+
+;---------------------------------
+; Postcript button
+;---------------------------------
+	 postcriptButton = widget_button(fileMenu, VALUE='Postcript', UVALUE='POSTCRIPT', $
+                             RESOURCE_NAME='postcript')
+
+;---------------------------------
+; Drawing window
+;---------------------------------
+	 drawFrame = widget_base(populBase, /FRAME)
+    state.drawWidget = widget_draw(drawFrame, XSIZE=600, YSIZE=450, $
+                                 /BUTTON_EVENTS, UVALUE='SET_SCALE')
+
+	 botones1 = widget_base(populBase, /FRAME, /ROW)
+
+;---------------------------------
+; Linear/logaritmic axis for X
+;---------------------------------
+	 linlogyFrame = widget_base(botones1, /COLUMN, /EXCLUSIVE)
+	 linyButton = widget_button(linlogyFrame, VALUE='Linear Y', $
+                               UVALUE='LOGY_OFF')
+	 logyButton = widget_button(linlogyFrame, VALUE='Log Y', $
+                               UVALUE='LOGY_ON')
+	 widget_control, (state.logy) ? logyButton : linyButton, /SET_BUTTON
+
+;---------------------------------
+; NLTE/LTE
+;---------------------------------
+	 nlte_lteFrame = widget_base(botones1, /COLUMN, /EXCLUSIVE)
+	 nlteButton = widget_button(nlte_lteFrame, VALUE='NLTE', $
+                               UVALUE='NLTE_ON')
+	 lteButton = widget_button(nlte_lteFrame, VALUE='LTE', $
+                               UVALUE='NLTE_OFF')
+	 widget_control, (state.nlte_lte) ? lteButton : nlteButton, /SET_BUTTON
+
+;---------------------------------
+; Frequency/wavelength
+;---------------------------------
+	 freqwaveFrame = widget_base(botones1, /COLUMN, /EXCLUSIVE)
+	 freqButton = widget_button(freqwaveFrame, VALUE='Frequency axis', $
+                               UVALUE='FREQ_ON')
+	 waveButton = widget_button(freqwaveFrame, VALUE='Wavelength axis', $
+                               UVALUE='FREQ_OFF')
+	 velcmFrame = widget_base(botones1, /COLUMN, /EXCLUSIVE)
+	 velocButton = widget_button(velcmFrame, VALUE='Velocity axis', $
+                               UVALUE='FREQ_VEL')
+	 cm_1Button = widget_button(velcmFrame, VALUE='cm^-1 axis', $
+                               UVALUE='FREQ_CM')
+	 widget_control, (state.freqwave) ? freqButton : waveButton, /SET_BUTTON
+
+	 intenFrame = widget_base(botones1, /COLUMN, /EXCLUSIVE)
+	 intenButton = widget_button(intenFrame, VALUE='Intensity', $
+                               UVALUE='INTENSITY')
+	 temperButton = widget_button(intenFrame, VALUE='Temperature', $
+                               UVALUE='TEMPERATURE')
+
+	 widget_control, (state.inten_temp) ? temperButton : intenButton, /SET_BUTTON
+;---------------------------------
+; Cleaning
+;---------------------------------
+	 cleanFrame = widget_base(botones1, /COLUMN)
+	 cleanButton = widget_button(cleanFrame, VALUE='Clean', $
+                               UVALUE='CLEAN')
+	 wholeButton = widget_button(cleanFrame, VALUE='All', $
+                               UVALUE='WHOLE')
+
+;---------------------------------
+; Blackbody
+;---------------------------------
+	 bbFrame = widget_base(botones1, /COLUMN)
+	 bbonButton = widget_label(bbFrame, VALUE='Blackbody', $
+                               UVALUE='BLACKB')
+	 state.bbtemp = widget_text(bbFrame, VALUE='1300', $
+                               UVALUE='BBTEMP', /EDITABLE)
+;---------------------------------
+; Level list
+;---------------------------------
+	 transFrame = widget_base( populBase, /ROW, /FRAME )
+	 lineFormat = 'Transition (!3Å)'
+	 lineFrame  = widget_base(transFrame, /COLUMN)
+	 lineLabel  = widget_label(lineFrame, VALUE='Line list        ')
+	 state.lineList = widget_list(lineFrame, UVALUE='LEVELLIST', $
+                                   RESOURCE_NAME='list', $
+                                   YSIZE=10, XSIZE=18, VALUE=lineFormat)
+
+	 unitsFrame = widget_base(transFrame, /COLUMN, /EXCLUSIVE)
+    hzButton = widget_button(unitsFrame, VALUE='Hz', UVALUE='HZ')
+    cmButton = widget_button(unitsFrame, VALUE='cm^-1', UVALUE='CM')
+    kelvinButton = widget_button(unitsFrame, VALUE='Kelvin', UVALUE='KELVIN')
+	 micronsButton = widget_button(unitsFrame, VALUE='Micron', UVALUE='MICRONS')
+	 angsButton = widget_button(unitsFrame, VALUE='Angstrom', UVALUE='ANGSTROMS')
+    widget_control, hzButton, /SET_BUTTON
+	 fill_lines_spectrum, state
+
+;---------------------------------
+; Wavelength slider
+;---------------------------------
+	 axisFrame = widget_base(transFrame, /COLUMN)
+	 state.labelmin = widget_label( axisFrame, /FRAME,/ DYNAMIC_RESIZE, VALUE='0')
+	 minSlider = widget_slider(axisFrame, TITLE='Minimum wavelength', $
+                                      UVALUE='MIN_SLIDER', XSIZE=255, $
+                                      MAXIMUM=spectrum.Nlambda - 1 , $
+                                      VALUE=0L)
+	 state.labelmax = widget_label( axisFrame, /FRAME,/ DYNAMIC_RESIZE, VALUE='0')
+	 maxSlider = widget_slider(axisFrame, TITLE='Maximum wavelength', $
+                                      UVALUE='MAX_SLIDER', XSIZE=255, $
+                                      MAXIMUM=spectrum.Nlambda - 1 , $
+                                      VALUE=spectrum.Nlambda - 1)
+	 muFrame = widget_base( transFrame, /ROW, /FRAME)
+	 state.labelMu = widget_label( muFrame, /FRAME, /DYNAMIC_RESIZE, VALUE = '1.0')
+	 lambdaSlider = widget_slider(muFrame, TITLE='mu angle', $
+                                      UVALUE='MU_SLIDER', XSIZE=255, $
+                                      MAXIMUM=geometry.Nmu - 1 , $
+                                      VALUE=0L)
+
+
+;---------------------------------
+; MU slider
+;---------------------------------
+
+
+;---------------------------------
+; Filter convolution
+;---------------------------------
+	 convoFrame = widget_base( populBase, /ROW, /FRAME)
+	 convoButton = widget_label(bbFrame, VALUE='Filter FWHM', $
+                               UVALUE='FILTER')
+	 state.sigma = widget_text(bbFrame, VALUE='10', $
+                               UVALUE='FILTERSIGMA', /EDITABLE)
+
+
+	 widget_control, widget_info(state.baseWidget, /CHILD), SET_UVALUE=state
+
+	 return, state
+end
+
+
+pro viewspectrum, LEADER=leader
+	 if (NOT keyword_set(LEADER)) then leader=0
+
+	 state = viewspectrum_init()
+
+	 widget_control, state.baseWidget, /REALIZE, GROUP_LEADER=leader
+
+	 xmanager, 'Viewspectrum', state.baseWidget, $
+    	  EVENT_HANDLER='Viewspectrum_event', GROUP_LEADER=leader
+end

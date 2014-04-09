@@ -1,0 +1,189 @@
+This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=latex 2010.1.8)  18 MAR 2010 18:56
+entering extended mode
+ %&-line parsing enabled.
+**manual.tex
+(./manual.tex
+LaTeX2e <2005/12/01>
+Babel <v3.8h> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, loaded.
+(/usr/share/texmf-texlive/tex/latex/base/article.cls
+Document Class: article 2005/09/16 v1.4f Standard LaTeX document class
+(/usr/share/texmf-texlive/tex/latex/base/size12.clo
+File: size12.clo 2005/09/16 v1.4f Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texmf-texlive/tex/latex/natbib/natbib.sty
+Package: natbib 2007/02/05 8.0 (PWD)
+\bibhang=\skip43
+\bibsep=\skip44
+LaTeX Info: Redefining \cite on input line 602.
+\c@NAT@ctr=\count87
+)
+(/usr/share/texmf-texlive/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2007/02/07 v6.75r Hypertext links for LaTeX
+
+(/usr/share/texmf-texlive/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks14
+)
+\@linkdim=\dimen103
+\Hy@linkcounter=\count88
+\Hy@pagecounter=\count89
+
+(/usr/share/texmf-texlive/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2007/02/07 v6.75r Hyperref: PDFDocEncoding definition (HO)
+)
+(/etc/texmf/tex/latex/config/hyperref.cfg
+File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
+)
+(/usr/share/texmf-texlive/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2006/08/22 v2.4 Connects package keyval with LaTeX options (
+HO)
+)
+Package hyperref Info: Hyper figures OFF on input line 2288.
+Package hyperref Info: Link nesting OFF on input line 2293.
+Package hyperref Info: Hyper index ON on input line 2296.
+Package hyperref Info: Plain pages OFF on input line 2303.
+Package hyperref Info: Backreferencing OFF on input line 2308.
+
+Implicit mode ON; LaTeX internals redefined
+Package hyperref Info: Bookmarks ON on input line 2444.
+(/usr/share/texmf-texlive/tex/latex/ltxmisc/url.sty
+\Urlmuskip=\muskip10
+Package: url 2005/06/27  ver 3.2  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 2599.
+\Fld@menulength=\count90
+\Field@Width=\dimen104
+\Fld@charsize=\dimen105
+\Choice@toks=\toks15
+\Field@toks=\toks16
+Package hyperref Info: Hyper figures OFF on input line 3102.
+Package hyperref Info: Link nesting OFF on input line 3107.
+Package hyperref Info: Hyper index ON on input line 3110.
+Package hyperref Info: backreferencing OFF on input line 3117.
+Package hyperref Info: Link coloring OFF on input line 3122.
+\Hy@abspage=\count91
+\c@Item=\count92
+\c@Hfootnote=\count93
+)
+*hyperref using driver hypertex*
+(/usr/share/texmf-texlive/tex/latex/hyperref/hypertex.def
+File: hypertex.def 2007/02/07 v6.75r Hyperref driver for HyperTeX specials
+) (./manual.aux)
+\openout1 = `manual.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 61.
+LaTeX Font Info:    ... okay on input line 61.
+Package hyperref Info: Link coloring OFF on input line 61.
+
+(/usr/share/texmf-texlive/tex/latex/hyperref/nameref.sty
+Package: nameref 2006/12/27 v2.28 Cross-referencing by name of section
+
+(/usr/share/texmf-texlive/tex/latex/oberdiek/refcount.sty
+Package: refcount 2006/02/20 v3.0 Data extraction from references (HO)
+)
+\c@section@level=\count94
+)
+LaTeX Info: Redefining \ref on input line 61.
+LaTeX Info: Redefining \pageref on input line 61.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <14.4> on input line 71.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 71.
+ (./manual.toc)
+\tf@toc=\write3
+\openout3 = `manual.toc'.
+
+
+[1
+
+] [2]
+Overfull \hbox (0.8366pt too wide) in paragraph at lines 110--114
+\OT1/cmtt/m/n/12 zxvf gocciola.tar.gz\OT1/cmr/m/n/12 , the Goc-ci-ola di-rec-to
+ry will con-tain the mas-ter in-put file \OT1/cmtt/m/n/12 config.dat
+ []
+
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 117.
+
+(/usr/share/texmf-texlive/tex/latex/base/omscmr.fd
+File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 117.
+
+Overfull \hbox (23.7407pt too wide) in paragraph at lines 172--172
+[]\OT1/cmtt/m/n/10 # (0 -> calculate pop, 1 -> write spectrum, 2 -> LTE spectru
+m, 3 -> previous run, 4 -> zeeman)[] 
+ []
+
+[3]
+Overfull \hbox (39.49057pt too wide) in paragraph at lines 204--204
+[]\OT1/cmtt/m/n/10 # Initial population (0 -> LTE, otherwise -> LVG with indica
+ted precision (if <0 then slow mode))[] 
+ []
+
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 207.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 207.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 207.
+
+Overfull \hbox (39.49057pt too wide) in paragraph at lines 242--242
+[]\OT1/cmtt/m/n/10 # Central source activation (3-> little source, 2 -> full so
+urce, 1 -> empty, 0-> absorbing (NO))[] 
+ []
+
+[4] [5] [6]
+Overfull \hbox (28.99066pt too wide) in paragraph at lines 431--431
+[]\OT1/cmtt/m/n/10 # (NOT USED) Iterative improvement of the solution (0 -> no,
+ otherwise -> number of iterations)[] 
+ []
+
+
+Overfull \hbox (13.2408pt too wide) in paragraph at lines 437--437
+[]\OT1/cmtt/m/n/10 # Linear system solver algorithm (0 -> LU solver, 1 -> SVD s
+olver, 2 -> SLAP, 3 -> BiCGStab)[] 
+ []
+
+[7]
+Overfull \hbox (128.73979pt too wide) in paragraph at lines 520--520
+[]\OT1/cmtt/m/n/10 # Iteration type (LAMBDA (1) /LAMBDAJAC (2) /JACOBI (3) /GS 
+(4) /SOR (5) /SEMIGS (6) /SEMISOR (7) /NEWTON_CEP (8))[] 
+ []
+
+[8] [9] [10] [11] [12] [13] (./manual.bbl) [14] (./manual.aux) ) 
+Here is how much of TeX's memory you used:
+ 2337 strings out of 95087
+ 32383 string characters out of 1183279
+ 81605 words of memory out of 1500000
+ 5538 multiletter control sequences out of 10000+50000
+ 9139 words of font info for 33 fonts, out of 1200000 for 2000
+ 28 hyphenation exceptions out of 8191
+ 25i,7n,24p,158b,479s stack positions out of 5000i,500n,6000p,200000b,5000s
+
+Output written on manual.dvi (14 pages, 27956 bytes).

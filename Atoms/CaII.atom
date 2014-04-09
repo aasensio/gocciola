@@ -1,0 +1,62 @@
+# One single ion (Ca II) with 5 bound levels, 5 active transitions,
+# 5 radiative (R) transitions, and 10 collisional (C) transitions.
+# NOTE: active transitions ... The RT equation has to be solved
+#       pasive transitions ... Radiation Temperatures a used
+# NOTE: active + passive transitions = number of R transitions = NR. 
+
+# Atom or molecule (ATOM / MOLECULE)
+ATOM
+
+# Name
+Ca
+
+# Mass of element 
+40.08
+
+# Number of ions
+1
+
+# Ionization levels
+0.d0
+
+# Number of levels
+5
+
+# Number of transitions
+10
+
+# Number of radiative transitions
+5
+
+# Number of active transitions
+5
+
+# Levels (E, g and ion)         '------------------'
+0.d0                    2               1                               'Nivel 0           '
+0.410d15                4               1                               'Nivel 1           '
+0.412d15                6               1                               'Nivel 2           '
+0.756d15                2               1                               'Nivel 3           '
+0.763d15                4               1                               'Nivel 4           '
+
+# Transitions (upper, lower, Aij)
+5               1                        1.4d8
+4               1                        1.4d8
+5               3                        7.2d6   
+5               2                        8.1d5
+4               2                        7.8d6
+
+# Collisional rates for all transitions
+FIXED
+1 10
+5     1  5.1d4
+4               1  5.1d4
+5               3  1.4d5
+5               2  1.6d4
+4               2  1.6d5
+3               1  8.2d3
+2               1  8.2d3
+5               4  4.8d6
+3               2  1.0d7
+4               3  1.0d3
+
+END

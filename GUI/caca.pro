@@ -1,0 +1,6 @@
+caca=fltarr(5,52)
+caca(0,*) = total(atom.pop(0:20,*),1) / total(atom.popi(0:21,*),1)
+caca(1,*) = total(atom.pop(21:41,*),1) / total(atom.popi(21:41,*),1)
+caca(2,*) = total(atom.pop(42:62,*),1) / total(atom.popi(42:62,*),1)
+caca(3,*) = total(atom.pop(63:83,*),1) / total(atom.popi(63:83,*),1)
+caca(4,*) = total(atom.pop(84:104,*),1) / total(atom.popi(84:104,*),1)

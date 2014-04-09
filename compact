@@ -1,0 +1,1 @@
+tar zcvf gocciola`date '+%d%b%y'`.tar.gz * --exclude '.*' --exclude compact --exclude '*.tar*'

@@ -1,0 +1,774 @@
+\documentclass[12pt]{article}
+\usepackage{natbib}
+\usepackage[hypertex]{hyperref}
+
+
+ \oddsidemargin 0.0in
+ \evensidemargin 0.0in
+ \textwidth 6.5in
+ \topmargin -0.75in
+ \textheight 9.5in
+ \pagestyle{empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\separation {0.5cm}
+\def\non{\nonumber \\}
+\def\DnuD     {\hbox{$\Delta\nu_D$}}
+\def\Jbar     {\hbox{$\bar J$}}
+\def\j        {\hbox{$\jmath$}}
+\def\N        {\hbox{$\cal N$}}
+\def\Ie       {\hbox{$I_e$}}
+\def\Ji       {\hbox{$\bar J^i_\mathrm{ext}$}}
+\def\about    {\hbox{$\sim$}}
+\def\x        {\hbox{$\times$}}
+\def\half     {\hbox{$1\over2$}}
+\def\Ncr      {\hbox{$N'_{\rm cr}$}}
+\def\mic      {\hbox{$\mu$m}}
+\def\ion#1#2  {#1\,{\small {#2}} }
+\def\tot      {\tau_t}
+\def\t(#1){\tau^{#1}}
+\def\a(#1){\alpha^{#1}}
+\def\G{Gocciola}
+\def\M{Gocciola}
+\def\LVG      {\texttt{LVG}}
+\def\slab     {\texttt{slab}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% For generation of the HTML manual with tth:
+\def\tthdump#1{#1}      % For generating TeX source; ignored by tth
+% Redefine symbols problematic for the browser:
+%%tth:\def\ga{\hbox{$>\sim$}}
+%%tth:\def\la{\hbox{$<\sim$}}
+%%tth:\def\Mo{\hbox{$M_o$}}
+%%tth:\def\Lo{\hbox{$L_o$}}
+%%tth:\def\Mdot{\hbox{$M^{dot}$}}
+%%tth:\def\Ivezic{Ivezic}
+
+%%tth:\begin{html}<TITLE>User Manual for MOLPOP-CEP</TITLE>\end{html}
+%%tth: This HTML file was generated from the TeX source by
+%%tth: the translator TTH, which uses symbol fonts.  These fonts are
+%%tth: not normally enabled for Netscape running under X, because of
+%%tth: the way Netscape groups its fonts. If your browser has problems
+%%tth: displaying the math symbols in this manual, an easy fix can be found
+%%tth: on the TTH website at
+%%tth:\begin{html}<A HREF="http://hutchinson.belmont.ma.us/tth/Xfonts.html">http://hutchinson.belmont.ma.us/tth/Xfonts.html</A>\end{html}
+%%tth:\begin{html}<HR>\end{html}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\title                  {\sc User Manual for \G}
+
+\author{ A. Asensio Ramos \& J. Trujillo Bueno\\
+         Instituto de Astrof\'{\i}sica de Canarias\\
+         38205, La Laguna, Tenerife, Spain\\ \\
+        \\[0.5in] \today}% \today}
+\date{}
+\maketitle
+
+
+\tableofcontents
+
+\newpage
+
+\section*{Disclaimer}
+
+This software is distributed ``as is'' and the authors do not take any
+responsibility for any consequence derived from its use. Use it with care and
+never trust the output without a careful meditation. 
+
+This code has been developed by Andr\'es Asensio Ramos. It may not be copied
+without acknowledging its origin. Use of this code is not restricted, provided
+that acknowledgement is made in each publication. The bibliographic reference
+to this code is Asensio Ramos, A. \& Trujillo Bueno, J., EAS Publications 
+Series, 18, 2006, 25. Send bug
+reports, comments and questions to A. Asensio Ramos (aasensio @ iac.es).
+
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+\G\ is a code for the solution of radiative transfer problems in
+multi-level atomic systems in plane-parallel and spherical
+geometries. The novel contribution of the code is that it
+makes use of the very fast iterative methods based on Gauss-Seidel
+and Successive Overrelaxation schemes to solve the problem.
+
+The code is written in standard Fortran 90 and has been tested
+with the Intel Fortran compiler and the GFortran compiler.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Uncompressing and compiling \G}
+
+The package comes in a single compressed file \texttt{gocciola.tar.gz}. After
+unpacking with \texttt{tar zxvf gocciola.tar.gz}, the \G\ directory
+will contain the master input file \texttt{config.dat} (see below) and the
+following subdirectories:
+
+\begin{itemize}
+\item
+{\tt Source} contains the Fortran 90 sources and a simple makefile.
+\item
+{\tt Atoms} contains molecular data files with energy levels,
+A-coefficients and collision rates
+\item
+{\tt Atmos} contains several examples of model atmospheres, giving
+the depth variation of several physical variables
+\item
+{\tt Results} contains the output of every run
+\item
+{\tt GUI} contains a preliminary version of a graphical user interface
+to analyze the output of the code written in IDL
+\end{itemize}
+
+The code has been tested on several Linux platforms using the Intel Fortran
+Compiler (ifort) and the GNU Fortran Compiler (\texttt{gfortran}). The
+source code is in the \texttt{Source} directory. The compilation is performed
+with the supplied \texttt{makefile}. It is quite simple and easy to modify, and
+contains additional comments about compiling and pre-processing flags. The
+default compiler is the free \texttt{gfortran} and you can use any other
+compiler through the variable \texttt{COMPILER}. To compile the code, type:
+
+\begin{footnotesize} \begin{verbatim}
+       make clean
+       make all
+\end{verbatim} \end{footnotesize}
+After compiling and linking, the executable is copied to the \G\
+directory that contains the master input \texttt{config.dat}. Running the
+program should produce output in the subdirectory {\tt Results}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Main configuration file}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Basic considerations}
+
+The input file {\tt config.dat} has a strict format and lines cannot
+be inserted without a crash of the program. For doing different calculations,
+just use the provided file as a template. In order to show the structure of an input file, we take
+the default file as example and consider all the input
+parameters one by one.
+
+\begin{footnotesize} \begin{verbatim}
+# Verbose mode (0-> no, 1-> yes)
+1
+\end{verbatim} \end{footnotesize}
+Sets the verbose mode on/off. If on, a lot of information is output to follow the iterative
+convergence.
+
+\begin{footnotesize} \begin{verbatim}
+# (0 -> calculate pop, 1 -> write spectrum, 2 -> LTE spectrum, 3 -> previous run, 4 -> zeeman)
+0
+\end{verbatim} \end{footnotesize}
+The standard option is to choose 0. In this case, it will solve the radiative
+transfer problem and output all information in several files. Option 1 reads the
+converged populations and writes the output spectrum. Option 2 calculates the spectrum
+in local thermodynamical equilibrium. Option 3 starts the population from
+a previous run.
+
+\begin{footnotesize} \begin{verbatim}
+# Interpolate the atmosphere (0-> no, n-> interpolate to n points)
+0
+\end{verbatim} \end{footnotesize}
+In case you want the code to re-interpolate the model atmosphere to a certain
+number of points. The typical value is 0 so that \G\ uses the model
+provided by the user.
+
+\begin{footnotesize} \begin{verbatim}
+# Plane-parallel or spherical (SPHERICAL/PLANEP)
+SPHERICAL
+\end{verbatim} \end{footnotesize}
+Select between spherical and plane-parallel calculations.
+
+\begin{footnotesize} \begin{verbatim}
+# Angle set for plane-parallel atmospheres (1/3)
+3
+\end{verbatim} \end{footnotesize}
+Number of angles used for the angular quadratures for
+calculating the mean intensity. The larger the number,
+the better the calculations but also the slower.
+
+\begin{footnotesize} \begin{verbatim}
+# Initial population (0 -> LTE, otherwise -> LVG with indicated precision (if <0 then slow mode))
+0
+\end{verbatim} \end{footnotesize}
+Initialize with local thermodynamical equilibrium populations using 0. If a positive
+number is used, this indicates the precision for an LVG calculation used to
+initialize (e.g., 10$^{-1}$).
+
+\begin{footnotesize} \begin{verbatim}
+# Characteristics going through the core
+12
+\end{verbatim} \end{footnotesize}
+Number of rays in the spherical case that will cross the
+inner core. The larger the number, the better the quality
+of the result.
+
+\begin{footnotesize} \begin{verbatim}
+# Dust activation (3 -> Fabrice Herpin, 2 -> realistic, 1 -> simple, 0-> no)
+0
+\end{verbatim} \end{footnotesize}
+In case you want to include dust opacity. Several options are possible and
+all of them are still preliminary.
+
+\begin{footnotesize} \begin{verbatim}
+# Cosmic Microwave Background activation (1-> yes, 0 -> no)
+1
+\end{verbatim} \end{footnotesize}
+Include the CMB radiation as a boundary condition.
+
+\begin{footnotesize} \begin{verbatim}
+# Background opacity activation (1 -> yes, 0 -> no)
+0
+\end{verbatim} \end{footnotesize}
+For cases in which there is a source of background opacity, set it to 1.
+The background opacity package include H$^-$, H, H$_2$ and Mg bound-free and free-free
+contributions, Thomson scattering and Rayleigh scattering in H and H$_2$. This
+package is more suitable for stellar atmospheres.
+
+\begin{footnotesize} \begin{verbatim}
+# Central source activation (3-> little source, 2 -> full source, 1 -> empty, 0-> absorbing (NO))
+1
+\end{verbatim} \end{footnotesize}
+Is there a source inside the inner core? If no, select 1. If yes and it is filling
+the core, select 2. If the source is smaller than the core, select 3. If the core
+is just absorbing all radiation, select 0.
+
+\begin{footnotesize} \begin{verbatim}
+# Microwave background temperature (K)
+2.726d0
+\end{verbatim} \end{footnotesize}
+Temperature of the CMB.
+
+\begin{footnotesize} \begin{verbatim}
+# Type of central source spectrum (BLACKB -> blackbody, GREYB -> grey body)
+BLACKB
+\end{verbatim} \end{footnotesize}
+Two different central sources are available. Either a blackbody characterized
+by a temperature or a grey body characterized by a temperature and some
+spectral variation.
+
+\begin{footnotesize} \begin{verbatim}
+# Reference wavelength (microns), opacity at ref. wave. and spectral index
+80.d0	2.5d0	1.d0
+\end{verbatim} \end{footnotesize}
+Data for the grey body.
+
+\begin{footnotesize} \begin{verbatim}
+# Central source temperature (K)
+       1218.9840
+\end{verbatim} \end{footnotesize}
+Temperature of the central source.
+
+\begin{footnotesize} \begin{verbatim}
+# Atmosphere file
+'Atmos/bernes.atmos'
+\end{verbatim} \end{footnotesize}
+File with the atmospheric model.
+
+\begin{footnotesize} \begin{verbatim}
+# Source distance (pc)
+1.d3
+\end{verbatim} \end{footnotesize}
+Distance to the source.
+
+\begin{footnotesize} \begin{verbatim}
+# Source's angular diameter (arcsec)
+26.73d0
+\end{verbatim} \end{footnotesize}
+Source angular size.
+
+\begin{footnotesize} \begin{verbatim}
+# Star radius (cm)
+3.67653d11
+\end{verbatim} \end{footnotesize}
+Radius of the central source (just in case it is smaller than the core).
+
+\begin{footnotesize} \begin{verbatim}
+# Telescope's sigma (arcsec) and beam cut (arcsec) (if 0, no cut)
+90.d0   0.d0
+\end{verbatim} \end{footnotesize}
+Size of the telescope beam in arcsec and size of the cutting in case
+the beam is not complete.
+
+\begin{footnotesize} \begin{verbatim}
+# Observing instrument (LWS, SWS, ...)
+LWS
+\end{verbatim} \end{footnotesize}
+Standard beams for some telescopes (not working at present).
+
+\begin{footnotesize} \begin{verbatim}
+# Save emerging spectrum (1 -> yes, 0-> no)
+1
+\end{verbatim} \end{footnotesize}
+A flag to indicate whether to save the output spectrum or not.
+
+\begin{footnotesize} \begin{verbatim}
+# Save radiative rates (1 -> yes, 0-> no)
+0
+\end{verbatim} \end{footnotesize}
+A flag to indicate whether to save the radiative rates or not.
+
+\begin{footnotesize} \begin{verbatim}
+# Include line overlapping (1 -> yes, 0-> no)
+0
+\end{verbatim} \end{footnotesize}
+Include line overlapping (experimental) or not.
+
+\begin{footnotesize} \begin{verbatim}
+# Use collisional coefficients (1 -> yes, 0 -> no)
+1
+\end{verbatim} \end{footnotesize}
+Include collisions or not.
+
+\begin{footnotesize} \begin{verbatim}
+# Output file
+'Results/output.dat'
+\end{verbatim} \end{footnotesize}
+Output file with the summary of the results.
+
+\begin{footnotesize} \begin{verbatim}
+# Iteration file
+'Results/iteration.dat'
+\end{verbatim} \end{footnotesize}
+Output file with the convergence history.
+
+\begin{footnotesize} \begin{verbatim}
+# Emerging spectrum output file
+'Results/spectrum.dat'
+\end{verbatim} \end{footnotesize}
+Output file with the final intensity spectrum.
+
+\begin{footnotesize} \begin{verbatim}
+# Emerging flux output file
+'Results/flux.dat'
+\end{verbatim} \end{footnotesize}
+Output file with the final flux spectrum.
+
+\begin{footnotesize} \begin{verbatim}
+# Final atmosphere output file
+'Results/atmosphere.dat'
+\end{verbatim} \end{footnotesize}
+Output file with the atmospheric file and some additional information.
+
+\begin{footnotesize} \begin{verbatim}
+# Final background opacity output file
+'Results/background.dat'
+\end{verbatim} \end{footnotesize}
+Output file with the background opacity data.
+
+\begin{footnotesize} \begin{verbatim}
+# Final radiative rates output file
+'Results/radrates.dat'
+\end{verbatim} \end{footnotesize}
+Output file with the final radiative rates.
+
+\begin{footnotesize} \begin{verbatim}
+# Final collisional rates
+'Results/collisrates.dat'
+\end{verbatim} \end{footnotesize}
+Output file with the final collisional rates.
+
+\begin{footnotesize} \begin{verbatim}
+# Maximum number of iterations
+100
+\end{verbatim} \end{footnotesize}
+Maximum number of allowed iterations for convergence.
+
+\begin{footnotesize} \begin{verbatim}
+# Number of iterations before any acceleration
+10
+\end{verbatim} \end{footnotesize}
+Iterations before acceleration. This is a typical value that works well
+although sometimes it has to be increased if a degradation in the
+convergence is detected.
+
+\begin{footnotesize} \begin{verbatim}
+# Number of steps before acceleration
+5
+\end{verbatim} \end{footnotesize}
+Number of iterations between accelerations.
+
+\begin{footnotesize} \begin{verbatim}
+# Order of acceleration (Ng) Maximum = 4
+2
+\end{verbatim} \end{footnotesize}
+Order of the Ng acceleration. This is a typical value.
+
+\begin{footnotesize} \begin{verbatim}
+# Type of acceleration (1 -> Ng,  otherwise -> No acceleration)
+1
+\end{verbatim} \end{footnotesize}
+If you want to apply accelerations, use 1. If not, use 0.
+
+\begin{footnotesize} \begin{verbatim}
+# Minimum value to turn on exponential expansion
+0.001d0
+\end{verbatim} \end{footnotesize}
+When the optical depth is very small, a series expansion is used for the
+exponential function. This sets the limit for the optical depth to be considered small.
+This is a good value.
+
+\begin{footnotesize} \begin{verbatim}
+# Maximum relative change of the solution
+8.d-4
+\end{verbatim} \end{footnotesize}
+Stopping criterion. If the maximum relative error is smaller than this, stop.
+
+\begin{footnotesize} \begin{verbatim}
+# (NOT USED) Iterative improvement of the solution (0 -> no, otherwise -> number of iterations)
+0
+\end{verbatim} \end{footnotesize}
+Not used.
+
+\begin{footnotesize} \begin{verbatim}
+# Linear system solver algorithm (0 -> LU solver, 1 -> SVD solver, 2 -> SLAP, 3 -> BiCGStab)
+0
+\end{verbatim} \end{footnotesize}
+Use 0 or 1 (better 0). The rest of methods are at the moment no operative and
+are only of interest for very large atomic/molecular models.
+
+\begin{footnotesize} \begin{verbatim}
+# Maximum relative change to turn on SNTB acceleration (not yet implemented)
+1.d-1
+\end{verbatim} \end{footnotesize}
+Not implemented.
+
+\begin{footnotesize} \begin{verbatim}
+# Optical depth to consider as optically thin
+1.d0
+\end{verbatim} \end{footnotesize}
+Not used right now.
+
+\begin{footnotesize} \begin{verbatim}
+# Number of points in the Gaussian quadrature for LVG
+24
+\end{verbatim} \end{footnotesize}
+Number of points in the Gaussian quadrature for integrals in the LVG initialization.
+
+\begin{footnotesize} \begin{verbatim}
+# Atomic or molecular model
+'Atoms/hco+.molecule'
+\end{verbatim} \end{footnotesize}
+File with the model atom/molecule.
+
+\begin{footnotesize} \begin{verbatim}
+# Use bound-free transitions (0 -> no, 1 -> yes)
+0
+\end{verbatim} \end{footnotesize}
+Use bound-free transitions if present in the model. Not finished.
+
+\begin{footnotesize} \begin{verbatim}
+# Number of Doppler widths to sample the profile
+8
+\end{verbatim} \end{footnotesize}
+Number of Doppler widths to use for the frequency integration in the
+calculation of the mean intensity. This value should be more than enough
+for moderate velocities.
+
+\begin{footnotesize} \begin{verbatim}
+# Number of frequency points to sample each Doppler width
+4
+\end{verbatim} \end{footnotesize}
+Number of points in frequency per Doppler width. The larger, the better
+the precision in the calculation of the mean intensity. This value gives good
+results.
+
+\begin{footnotesize} \begin{verbatim}
+# Reference lambda for dust (microns)
+180.d0
+\end{verbatim} \end{footnotesize}
+Some data for dust.
+
+\begin{footnotesize} \begin{verbatim}
+# Dust opacity exponent (lambda/lambda_ref)**(-exponent)
+2.d0
+\end{verbatim} \end{footnotesize}
+Some data for dust.
+
+\begin{footnotesize} \begin{verbatim}
+# Helium abundance
+0.2d0
+\end{verbatim} \end{footnotesize}
+Helium abundance in case collisions with He are used.
+
+\begin{footnotesize} \begin{verbatim}
+# Atomic hydrogen abundance (in case of molecular model)
+0.0d0
+\end{verbatim} \end{footnotesize}
+Multiplication factor (if non-zero) for the H abundance.
+
+\begin{footnotesize} \begin{verbatim}
+# Error (0 -> convergence error, 1 -> true error (needs a previous run with 0)
+0
+\end{verbatim} \end{footnotesize}
+Set it to zero.
+
+\begin{footnotesize} \begin{verbatim}
+# Iteration type (LAMBDA (1) /LAMBDAJAC (2) /JACOBI (3) /GS (4) /SOR (5) /SEMIGS (6) /SEMISOR (7) /NEWTON_CEP (8))
+3
+\end{verbatim} \end{footnotesize}
+Iterative scheme. The most robusts are 2 and 3, which use the accelerated $\Lambda$ iteration.
+
+\begin{footnotesize} \begin{verbatim}
+# Omega (if SOR, then give value of omega in the following lines)
+1.5d0
+\end{verbatim} \end{footnotesize}
+A parameter only used when converging with the SOR method.
+
+\section{Atomic file}
+In this section, we explain the basic format for an atomic/molecular
+model. As an example, we choose the file \texttt{Atoms/hco+.molecule}.
+\begin{footnotesize} \begin{verbatim}
+# HCO+ molecular data file
+# 
+# 
+# 
+# 
+
+# Atom or molecule (ATOM / MOLECULE)
+MOLECULE
+\end{verbatim} \end{footnotesize}
+The first 5 lines can be filled with comments. The first
+line selects between molecules and atoms because of the
+slightly different treatment in the code.
+
+\begin{footnotesize} \begin{verbatim}
+# Name
+HCO+
+\end{verbatim} \end{footnotesize}
+The name of the atom/molecule.
+
+\begin{footnotesize} \begin{verbatim}
+# Mass of element 
+29.0
+\end{verbatim} \end{footnotesize}
+The mass of the atom/molecule in UMA.
+
+\begin{footnotesize} \begin{verbatim}
+# Number of ions
+1
+\end{verbatim} \end{footnotesize}
+The number of ionization states. This is always 1 for molecules.
+
+\begin{footnotesize} \begin{verbatim}
+# Ionization levels
+0.d0
+\end{verbatim} \end{footnotesize}
+The ionization levels in Hz.
+
+\begin{footnotesize} \begin{verbatim}
+# Number of levels
+21
+\end{verbatim} \end{footnotesize}
+Number of energy levels.
+
+\begin{footnotesize} \begin{verbatim}
+# Number of transitions
+210
+\end{verbatim} \end{footnotesize}
+Total number of transitions (radiative+collisional).
+
+\begin{footnotesize} \begin{verbatim}
+# Number of radiative transitions (bound-bound and bound-free)
+20 0
+\end{verbatim} \end{footnotesize}
+Number of radiative transitions (bound-bound and bound-free).
+
+\begin{footnotesize} \begin{verbatim}
+# Number of active transitions
+20
+\end{verbatim} \end{footnotesize}
+Number of active radiative transitions (transitions that are included
+in the iterative process). Typically set this number equal to the number
+of radiative transitions.
+
+\begin{footnotesize} \begin{verbatim}
+# Levels (E (cm^-1), g and ion)    	'------------------'
+0.d0   1  1     'Level J=0         '
+2.9750095  3  1 'Level J=1         '
+8.9249613   5     1  'Level J=2  		 '
+17.8497228   7     1  'Level J=3  		 '
+29.7490978   9     1  'Level J=4  		 '
+\end{verbatim} \end{footnotesize}
+Information about the energy levels. The first number is the energy in cm$^{-1}$. The
+second is the statistical weight. The third is the ionization state (always 1 for
+molecules). The last column can be filled with comments to identify the level.
+
+\begin{footnotesize} \begin{verbatim}
+# Transitions (upper, lower, Aij for radiative ones)
+2 1 4.217E-05
+3 2 4.048E-04
+4 3 1.464E-03
+5 4 3.598E-03
+6 5 7.186E-03
+7 6 1.261E-02
+8 7 2.024E-02
+9 8 3.046E-02
+10 9 4.365E-02
+11  10 6.017E-02
+12  11 8.042E-02
+13  12  1.048E-01
+14   13 1.336E-01
+15   14 1.672E-01
+16   15 2.061E-01
+17   16 2.505E-01
+18   17 3.009E-01
+19   18 3.576E-01
+20   19 4.210E-01
+21   20 4.914E-01
+\end{verbatim} \end{footnotesize}
+Radiative transitions showing the index of the upper and lower level and the Einstein 
+coefficient for spontaneous emission $A_\mathrm{ul}$ in s$^{-1}$.
+
+\begin{footnotesize} \begin{verbatim}
+# Collisional rates for all transitions
+INTERPOL_H2
+1 210
+4
+10.0
+20.0
+30.0
+40.0
+
+# Collisional data (first are radiative transitions)
+ 2   1   0.250000E-09 0.220000E-09 0.210000E-09 0.200000E-09
+ 3   2   0.450000E-09 0.400000E-09 0.370000E-09 0.350000E-09
+ 4   3   0.400000E-09 0.400000E-09 0.390000E-09 0.370000E-09
+ 5   4   0.380000E-09 0.380000E-09 0.370000E-09 0.380000E-09
+ 6   5   0.270000E-09 0.310000E-09 0.320000E-09 0.320000E-09
+ 7   6   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09 
+ 8   7   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09
+ 9   8   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09
+10   9   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09  
+11  10   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09
+12  11   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09 
+13  12   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09
+14  13   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09
+15  14   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09
+16  15   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09
+17  16   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09
+18  17   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09
+19  18   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09
+20  19   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09
+21  20   0.280000E-09 0.280000E-09 0.280000E-09 0.280000E-09   
+ 3   1   0.150000E-09 0.130000E-09 0.120000E-09 0.120000E-09
+ 4   1   0.830000E-10 0.730000E-10 0.630000E-10 0.660000E-10
+ 4   2   0.290000E-09 0.260000E-09 0.230000E-09 0.210000E-09
+ 5   1   0.830000E-10 0.740000E-10 0.670000E-10 0.670000E-10
+ 5   2   0.160000E-09 0.150000E-09 0.140000E-09 0.140000E-09
+ 5   3   0.290000E-09 0.290000E-09 0.280000E-09 0.270000E-09
+...............
+21  14   0.200000E-10 0.200000E-10 0.200000E-10 0.200000E-10
+21  15   0.300000E-10 0.300000E-10 0.300000E-10 0.300000E-10
+21  16   0.100000E-09 0.100000E-09 0.100000E-09 0.100000E-09
+21  17   0.200000E-09 0.200000E-09 0.200000E-09 0.200000E-09
+21  18   0.200000E-09 0.200000E-09 0.200000E-09 0.200000E-09
+21  19   0.270000E-09 0.270000E-09 0.270000E-09 0.270000E-09
+
+END
+\end{verbatim} \end{footnotesize}
+Collisional information. The first line indicates the type of
+collisions. For molecules, use \texttt{INTERPOL\_H2}. The next
+line indicates the initial and final collisional transition.
+The next line indicates the number of temperatures for which
+the collisional rates are given. Then, a large list comes with the
+upper and lower level of each transition and the collisional
+rate for each temperature. Note that the first transitions have
+to coincide with those for radiative transitions.
+ 
+\begin{footnotesize} \begin{verbatim}
+# Partition function (if 0, then use partition function calculated from energy levels)
+0
+\end{verbatim} \end{footnotesize}
+Give zero in case the partition function is calculated from the model. If you
+want to use an already existing partition function, give the number of
+coefficients and then, in another line, the coefficients of the interpolation.
+Interpolation functions similar to those of Sauval \& Tatum (1984) are used.
+
+\section{Atmospheric model}
+In this section, we explain the basic format for an atmospheric model.
+As an example, we choose the file \texttt{Atmos/hco+.atmos}.
+
+\begin{footnotesize}
+\begin{footnotesize} \begin{verbatim}
+# TEST PROBLEM 1: HCO+ in inside-out collapse model: low abundance (all units are cgs)
+#      r	(cm)		T(K)	  n(H2)		n(HCO+)		ne		v_mic(km/s)  T_dust   v_mac (km/s)
+#
+ 50
+  1.00065e+16   18.9000   254834.  1.00000e-09   0.0	0.15900       0.0 	  -0.7659920	0.0
+  1.08209e+16   18.3635   235655.  1.00000e-09   0.0	0.15837       0.0 	  -0.7274062	0.0
+  1.17017e+16   17.8423   217917.  1.00000e-09   0.0	0.15766       0.0 	  -0.6896906	0.0
+  1.26541e+16   17.3358   201516.  1.00000e-09   0.0	0.15688       0.0 	  -0.6528440	0.0
+  1.36840e+16   16.8437   186349.  1.00000e-09   0.0	0.15601       0.0 	  -0.6168676	0.0
+  1.47977e+16   16.3656   172324.  1.00000e-09   0.0	0.15507       0.0 	  -0.5817597	0.0
+  1.60021e+16   15.9011   159354.  1.00000e-09   0.0	0.15407       0.0 	  -0.5475215	0.0
+  1.73046e+16   15.4497   147360.  1.00000e-09   0.0	0.15303       0.0 	  -0.5141520	0.0
+  1.87130e+16   15.0112   136269.  1.00000e-09   0.0	0.15197       0.0 	  -0.4816522	0.0
+\end{verbatim} \end{footnotesize}
+\end{footnotesize}
+The first three lines are comments and are freely available for the
+user. The next line gives the number of shells of the model. Then,
+for each shell, we have to give:
+\begin{itemize}
+ \item Radial position or height in cm. Note that for a plane-parallel atmosphere, the
+absolute value of the position is irrelevant and only the difference between
+two contiguous shells is important. For a spherical model, the first shell defines
+the size of the inner core
+\item Temperature in K
+\item Hydrogen number density in cm$^{-3}$: H for atomic species and H$_2$ for molecular species
+\item Atomic/molecular abundance. The number density of the species at each position is obtained
+multiplying this number by the hydrogen abundance
+\item Electron number density in cm$^{-3}$. It is only of importance for atomic calculations
+\item Microturbulent velocity in km s$^{-1}$
+\item Dust temperature in K in case dust is included
+\item Macroscopic velocity in km s$^{-1}$
+\item Gas pressure in dyn cm$^{-2}$ in case one wants to include background opacity in atomic calculations
+\end{itemize}
+
+\section{Output}
+\G\ generates several files as output, all of them saved in the \texttt{Results} directory.
+\begin{itemize}
+\item \texttt{atmosphere.dat} contains information about the model atmosphere. The input
+model atmosphere is copied, together with the computed impact parameters.
+\item \texttt{output.dat}
+\item \texttt{spectrum.dat}
+\item \texttt{iteration.dat}
+\item \texttt{flux.dat}
+\item \texttt{collisrates.dat}
+\end{itemize}
+
+
+\section{Graphical User Interface}
+Directory \texttt{GUI} contains a set of IDL programs for graphically
+analyzing the results of a calculation. To use it, just run the
+following in an IDL session:
+\begin{verbatim}
+IDL> @init
+IDL> analyze
+\end{verbatim}
+The widgets are easy to use and should be easy to understand.
+
+\newpage
+\section*{Acknowledgements}
+We would like to acknowledge R. Manso Sainz for useful discussions during the development
+of the code and for suggesting the final name of the code. We thank
+J. Cernicharo for his interest in the initial phases of the work. Finantial support
+by the Spanish Ministry of Science and Innovation through projects AYAAYA2007-63881 and the European
+Commission through the SOLAIRE network (MTRN-CT-2006-035484).
+
+\bibliographystyle{apj}
+\bibliography{/home/aasensio/Dropbox/biblio}
+
+
+\end{document}
